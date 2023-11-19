@@ -42,6 +42,8 @@ int main() {
         std::cin >> a >> b >> p;
         if (a <= x && b <= y) 
             prices[a][b] = p;
+        if (a != b && a <= y && b <= x)
+            prices[b][a] = p;
     }
 
     int maxPrice = calculatePrice(marbleSheet, prices);
