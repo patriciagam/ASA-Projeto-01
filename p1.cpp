@@ -1,53 +1,61 @@
 #include <iostream>
 #include <vector>
+#include <algorithm> 
 
 struct Piece {
     int width;
     int height;
+    int price;
 };
 
-int calculatePrice(Piece& piece, std::vector<std::vector<int>>& prices) {
-    std::vector<std::vector<int>> dp(piece.width + 1, std::vector<int>(piece.height + 1, 0));
-
-    for (int i = 1; i <= piece.width; ++i) {
-        for (int j = 1; j <= piece.height; ++j) {
-            int maxCutOption = 0;
-
-            for (int k = 1; k <= i / 2; ++k) {
-                int cutOption = dp[i - k][j] + dp[k][j];
-                maxCutOption = std::max(maxCutOption, cutOption);
-            }
-            
-            for (int k = 1; k <= j / 2; ++k) {
-                int cutOption = dp[i][j - k] + dp[i][k];
-                maxCutOption = std::max(maxCutOption, cutOption);
-            }
-
-            dp[i][j] = std::max(maxCutOption, prices[i][j]);
-        }
-    }
-    return dp[piece.width][piece.height];
+bool comparePricePerArea(const Piece& a, const Piece& b) {
+    return (a.price / (a.width * a.height)) > (b.price / (b.width * b.height));
 }
 
+int calculatePrice(Piece& marbleSheet, std::vector<Piece>& pieces, int i) {
+    int size = pieces.size();
+    if (i >= size || marbleSheet.width == 0 || marbleSheet.height == 0) {
+        return 0;
+    }
+
+    if (marbleSheet.width >= pieces[i].width && marbleSheet.height >= pieces[i].height) {
+        int piecesAlongWidth =  marbleSheet.width / pieces[i].width;
+        int piecesAlongHeight = marbleSheet.height / pieces[i].height;
+        int pieceCount = piecesAlongWidth * piecesAlongHeight;
+            
+        marbleSheet.width -= pieces[i].width * piecesAlongWidth;
+        marbleSheet.height -= pieces[i].height * piecesAlongHeight;
+        marbleSheet.price += pieces[i].price * pieceCount;
+    }
+
+    return marbleSheet.price + calculatePrice(marbleSheet, pieces, i + 1);
+}
 
 int main() {
     int x, y, n;
     std::cin >> x >> y >> n;
 
-    Piece marbleSheet = {x, y};
-    std::vector<std::vector<int>> prices(x + 1, std::vector<int>(y + 1, 0));
+    Piece marbleSheet = {x, y, 0};
+    std::vector<Piece> pieces;
 
     for (int i = 0; i < n; ++i) {
         int a, b, p;
         std::cin >> a >> b >> p;
-        if (a <= x && b <= y) 
-            prices[a][b] = p;
-        if (a != b && a <= y && b <= x)
-            prices[b][a] = p;
+        if (a <= marbleSheet.width && b <= marbleSheet.height) {
+            Piece piece = {a, b, p};
+            pieces.push_back(piece);
+        }
+        if (a <= marbleSheet.height && b <= marbleSheet.width && a != b) {
+            Piece piece = {b, a, p};
+            pieces.push_back(piece);
+        }
     }
 
-    int maxPrice = calculatePrice(marbleSheet, prices);
-    std::cout << maxPrice<< std::endl;
+    std::sort(pieces.begin(), pieces.end(), comparePricePerArea);
+
+    marbleSheet.price = calculatePrice(marbleSheet, pieces, 0);
+
+    std::cout << marbleSheet.price << std::endl;
 
     return 0;
 }
