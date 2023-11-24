@@ -6,28 +6,28 @@ struct Piece {
     int height;
 };
 
-int calculatePrice(Piece& piece, std::vector<int>& prices) {
+int calculatePrice(const Piece& piece, const std::vector<int>& prices) {
     std::vector<int> dp((piece.width + 1) * (piece.height + 1), 0);
 
     for (int i = 1; i <= piece.width; ++i) {
         for (int j = 1; j <= piece.height; ++j) {
-            int maxCutOption = 0, cutOption = 0;
+            int maxPrice = prices[i * (piece.height + 1) + j];
 
             for (int k = 1; k <= i / 2; ++k) {
-                cutOption = dp[(i - k) * (piece.height + 1) + j] + dp[k * (piece.height + 1) + j];
-                maxCutOption = std::max(maxCutOption, cutOption);
+                maxPrice = std::max(maxPrice, dp[(i - k) * (piece.height + 1) + j] + dp[k * (piece.height + 1) + j]);
             }
 
             for (int k = 1; k <= j / 2; ++k) {
-                cutOption = dp[i * (piece.height + 1) + (j - k)] + dp[i * (piece.height + 1) + k];
-                maxCutOption = std::max(maxCutOption, cutOption);
+                maxPrice = std::max(maxPrice, dp[i * (piece.height + 1) + (j - k)] + dp[i * (piece.height + 1) + k]);
             }
 
-            dp[i * (piece.height + 1) + j] = std::max(maxCutOption, prices[i * (piece.height + 1) + j]);
+            dp[i * (piece.height + 1) + j] = maxPrice;
         }
     }
+
     return dp[piece.width * (piece.height + 1) + piece.height];
 }
+
 
 
 int main() {
