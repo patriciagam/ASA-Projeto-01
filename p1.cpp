@@ -1,25 +1,25 @@
 #include <iostream>
 #include <vector>
 
+using namespace std;
+
 struct Piece {
     int width;
     int height;
 };
 
-
-
-int calculatePrice(const Piece& piece, std::vector<std::vector<int>>& prices) {
-    std::vector<std::vector<int>> dp(piece.width + 1, std::vector<int>(piece.height + 1, 0));
+int calculatePrice(const Piece& piece, vector<vector<int>>& prices) {
+    vector<vector<int>> dp(piece.width + 1, vector<int>(piece.height + 1, 0));
 
     for (int i = 1; i <= piece.width; ++i) {
         for (int j = 1; j <= piece.height; ++j) {
             int maxPrice = prices[i][j];
 
-            for (int k = 1; k <= i / 2; ++k) {
-                maxPrice = std::max(dp[i - k][j] + dp[k][j], maxPrice);
-            }
-            for (int k = 1; k <= j / 2; ++k) {
-                maxPrice = std::max(dp[i][j - k] + dp[i][k], maxPrice);
+            for (int k = 1; k <= max(i / 2, j / 2); ++k) {
+                if (k <= i / 2)
+                    maxPrice = max(dp[i - k][j] + dp[k][j], maxPrice);
+                if (k <= j / 2)
+                    maxPrice = max(dp[i][j - k] + dp[i][k], maxPrice);
             }
             dp[i][j] = maxPrice;
         }
@@ -33,7 +33,7 @@ int main() {
     scanf("%d %d %d", &x, &y, &n);
 
     Piece marbleSheet = {x, y};
-    std::vector<std::vector<int>> prices(x + 1, std::vector<int>(y + 1, 0));
+    vector<vector<int>> prices(x + 1, vector<int>(y + 1, 0));
 
     for (int i = 0; i < n; ++i) {
         int a, b, p;
@@ -48,3 +48,4 @@ int main() {
 
     return 0;
 }
+
