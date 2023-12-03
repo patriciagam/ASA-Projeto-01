@@ -8,12 +8,10 @@ struct Piece {
     int height;
 };
 
-int calculatePrice(const Piece& piece, vector<vector<int>>& prices) {
-    vector<vector<int>> dp(piece.width + 1, vector<int>(piece.height + 1, 0));
-
+int calculatePrice(const Piece& piece, vector<vector<int>>& dp) {
     for (int i = 1; i <= piece.width; ++i) {
         for (int j = 1; j <= piece.height; ++j) {
-            int maxPrice = prices[i][j];
+            int maxPrice = dp[i][j];
 
             for (int k = 1; k <= max(i / 2, j / 2); ++k) {
                 if (k <= i / 2)
@@ -21,31 +19,30 @@ int calculatePrice(const Piece& piece, vector<vector<int>>& prices) {
                 if (k <= j / 2)
                     maxPrice = max(dp[i][j - k] + dp[i][k], maxPrice);
             }
+
             dp[i][j] = maxPrice;
         }
     }
     return dp[piece.width][piece.height];
 }
 
-
 int main() {
     int x, y, n;
     scanf("%d %d %d", &x, &y, &n);
 
     Piece marbleSheet = {x, y};
-    vector<vector<int>> prices(x + 1, vector<int>(y + 1, 0));
+    vector<vector<int>> dp(x + 1, vector<int>(y + 1, 0));
 
     for (int i = 0; i < n; ++i) {
         int a, b, p;
         scanf("%d %d %d", &a, &b, &p);
         if (a <= x && b <= y) 
-            prices[a][b] = p;
+            dp[a][b] = p;
         if (a != b && a <= y && b <= x)
-            prices[b][a] = p;
+            dp[b][a] = p;
     }
-    int maxPrice = calculatePrice(marbleSheet, prices);
+    int maxPrice = calculatePrice(marbleSheet, dp);
     printf("%d\n", maxPrice);
 
     return 0;
 }
-
